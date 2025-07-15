@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-PRODUCTS_FILE = 'filtered_data_part1_no_reviews.json'
+PRODUCTS_FILE = 'filtered_data_part1.json'
 
 with open(PRODUCTS_FILE, encoding='utf-8') as f:
     products = json.load(f)
@@ -21,11 +21,6 @@ with sync_playwright() as p:
     page = browser_context.new_page()
 
     for product in products:
-        # 🚦 Skip if reviews already exist
-        if "reviews" in product:
-            print(f"⏩ Skipping (already processed): {product['link']}")
-            continue
-
         url = product["link"]
         print(f"🌐 Visiting: {url}")
         
@@ -43,7 +38,7 @@ with sync_playwright() as p:
             print(f"🚧 CAPTCHA detected at {page.url}. Solve manually and press Enter to continue...")
             input()
 
-        # 📋 Scrape other product fields
+        # 📋 Scrape product info fields
         brand_el = page.query_selector(".pdp-product-brand__brand-link")
         avg_rating_el = page.query_selector(".score-average")
         ratings_count_el = page.query_selector(".count")
@@ -58,12 +53,18 @@ with sync_playwright() as p:
         product["description"] = description_el.inner_text().strip() if description_el else None
         product["specifications"] = specs_el.inner_text().strip() if specs_el else None
 
+        # Save info fields right away
+        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(products, f, indent=2, ensure_ascii=False)
+
+        # 🚦 Skip reviews if already scraped
+        if "reviews" in product:
+            print(f"⏩ Skipping reviews (already processed): {product['link']}")
+            continue
+
         # Scroll to reviews section
         page.evaluate("document.querySelector('#block-HvK2CIMcYsU')?.scrollIntoView()")
         time.sleep(2)
-        
-        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(products, f, indent=2, ensure_ascii=False)
 
         # Detect if no reviews exist
         mod_empty = page.query_selector(".mod-empty")
