@@ -1,0 +1,124 @@
+{
+    "regions": [
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "9706000",
+            "name": "BARMM / RBOC"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R001000",
+            "name": "REGION I"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R002000",
+            "name": "REGION II"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R003000",
+            "name": "REGION III"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R005000",
+            "name": "REGION V"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R006000",
+            "name": "REGION VI"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R007000",
+            "name": "REGION VII"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R008000",
+            "name": "REGION VIII"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R009000",
+            "name": "REGION IX"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R00LAV0",
+            "name": "LAV"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R00NIR0",
+            "name": "NIR"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R010000",
+            "name": "REGION X"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R011000",
+            "name": "REGION XI"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R012000",
+            "name": "REGION XII"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R013000",
+            "name": "REGION XIII"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R04A000",
+            "name": "REGION IV-A"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R04B000",
+            "name": "REGION IV-B"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R0BARMM",
+            "name": "BARMM"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R0CAR00",
+            "name": "CORDILLERA ADMINISTRATIVE REGION"
+        },
+        {
+            "categoryCode": "2",
+            "masterCode": "0",
+            "code": "R0NCR00",
+            "name": "NATIONAL CAPITAL REGION"
+        }
+    ]
+}

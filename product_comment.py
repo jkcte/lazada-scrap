@@ -1,132 +1,106 @@
-# Lazada Product Detail Scraper - Retry Until All Products Are Scraped
-
 from playwright.sync_api import sync_playwright
 import json
 import time
 import random
-import math
-import os
+from datetime import datetime
 
-# Load product links
-with open("products.json", "r", encoding="utf-8") as f:
-    full_product_list = json.load(f)
+PRODUCTS_FILE = 'product_with_no_reviews.json'
 
-# Load existing data if present
-if os.path.exists("product_details.json"):
-    with open("product_details.json", "r", encoding="utf-8") as f:
-        detailed_data = json.load(f)
-else:
-    detailed_data = []
+with open(PRODUCTS_FILE, encoding='utf-8') as f:
+    products = json.load(f)
 
-# Load skipped links if present
-if os.path.exists("skipped_links.json"):
-    with open("skipped_links.json", "r", encoding="utf-8") as f:
-        skipped_links = json.load(f)
-else:
-    skipped_links = []
+USER_DATA_DIR = r"C:\Users\Owner\AppData\Local\Google\Chrome\User Data"
 
-# Extract links already processed
-processed_links = {d.get("link") for d in detailed_data}
-
-# Retry loop: continue until there are no more unprocessed links
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=False, slow_mo=100)
+    browser_context = p.chromium.launch_persistent_context(
+        user_data_dir=USER_DATA_DIR,
+        headless=False,
+        viewport={"width": 1280, "height": 800},
+        slow_mo=100,
+    )
+    page = browser_context.new_page()
 
-    while True:
-        remaining_products = [p for p in full_product_list if p.get("link") not in processed_links and p.get("link") not in skipped_links]
-        if not remaining_products:
-            print("All products processed. Exiting loop.")
-            break
+    for product in products:
+        url = product["link"]
+        print(f"🌐 Visiting: {url}")
+        page.goto(url, timeout=60000)
 
-        print(f"Remaining to process: {len(remaining_products)}")
-        rotation_limit = 50
-        rotation_count = 0
+        time.sleep(random.uniform(2, 4))
+        page.keyboard.press("PageDown")
+        time.sleep(random.uniform(2, 4))
 
-        while rotation_count * rotation_limit < len(remaining_products):
-            start = rotation_count * rotation_limit
-            end = min(start + rotation_limit, len(remaining_products))
-            context = browser.new_context()
-            print(f"\n--- Rotation {rotation_count + 1}: Processing products {start + 1} to {end} ---\n")
+        if "punish" in page.url:
+            print(f"🚧 CAPTCHA detected at {page.url}. Solve manually and press Enter to continue...")
+            input()
 
-            for idx in range(start, end):
-                product = remaining_products[idx]
-                link = product.get("link")
-                if not link:
-                    continue
+        # Scroll to reviews section
+        page.evaluate("document.querySelector('#block-HvK2CIMcYsU')?.scrollIntoView()")
+        time.sleep(2)
 
-                try:
-                    page = context.new_page()
-                    print(f"Visiting: {link}")
-                    page.goto(link, timeout=30000)
+        page.wait_for_selector(".item-top", timeout=15000)
+        time.sleep(3)
 
-                    if "/punish?" in page.url or "x5secdata" in page.url or "Just a moment" in page.title():
-                        print(f"Blocked by CAPTCHA at {link}, skipping.")
-                        skipped_links.append(link)
-                        page.close()
-                        continue
+        reviews = []
+        page_num = 1
 
-                    try:
-                        page.wait_for_selector(".pdp-mod-product-badge-title", timeout=10000)
-                    except:
-                        print(f"Product title not found at {link}, skipping.")
-                        skipped_links.append(link)
-                        page.close()
-                        continue
+        while True:
+            print(f"🔎 Scraping reviews page {page_num}...")
+            review_items = page.query_selector_all(".item-top")
 
-                    brand = None
-                    if page.locator(".pdp-product-brand__brand-link").is_visible():
-                        brand = page.locator(".pdp-product-brand__brand-link").inner_text()
-                    product["brand"] = brand
+            if not review_items:
+                print("⚠️ No reviews found on this page.")
+                break
 
-                    try:
-                        for _ in range(10):
-                            page.mouse.wheel(0, 500)
-                            time.sleep(0.5)
-                            if page.locator(".mod-reviews").is_visible():
-                                break
-                        page.wait_for_selector(".mod-reviews", timeout=10000)
-                    except:
-                        print("Review section did not load.")
-                        product["comments"] = []
-                        detailed_data.append(product)
-                        processed_links.add(link)
-                        page.close()
-                        time.sleep(random.expovariate(1/6) + 4)
-                        continue
+            for idx, review_top in enumerate(review_items):
+                review_container = review_top.evaluate_handle("el => el.closest('.item') || el")
 
-                    comments = []
-                    review_items = page.locator(".mod-reviews .item")
-                    count = review_items.count()
+                reviewer_el = review_container.query_selector(".item-top .reviewer")
+                date_el = review_container.query_selector(".item-top .time")
+                stars = len(review_container.query_selector_all(".item-middle .container-star .star"))
+                sku_info_el = review_container.query_selector(".skuInfo-value")
+                text_el = review_container.query_selector(".item-content-main-content-reviews-item span")
 
-                    for i in range(min(5, count)):
-                        try:
-                            item = review_items.nth(i)
-                            stars = item.locator(".container-star.starCtn.left .star").count()
-                            comment = item.locator(".item-content .content").inner_text()
-                            comments.append({"stars": stars, "comment": comment})
-                        except Exception as e:
-                            print("Review extraction error:", e)
-                            continue
+                review_data = {
+                    "reviewer": reviewer_el.inner_text().strip() if reviewer_el else None,
+                    "date": date_el.inner_text().strip() if date_el else None,
+                    "rating": stars,
+                    "sku_info": sku_info_el.inner_text().strip() if sku_info_el else None,
+                    "text": text_el.inner_text().strip() if text_el else None,
+                    "scraped_at": datetime.now().isoformat()
+                }
 
-                    product["comments"] = comments
-                    detailed_data.append(product)
-                    processed_links.add(link)
-                    page.close()
-                    time.sleep(random.expovariate(1/6) + 4)
+                print(f"    {review_data}")
+                reviews.append(review_data)
 
-                except Exception as e:
-                    print(f"Error processing {link}: {e}")
-                    skipped_links.append(link)
-                    time.sleep(random.expovariate(1/6) + 4)
-                    continue
+            # New pagination logic
+            next_li = page.query_selector("ul.iweb-pagination.review-pagination li.iweb-pagination-next")
+            if next_li:
+                is_disabled = next_li.get_attribute("aria-disabled")
+                if is_disabled == "true":
+                    print("✅ No more review pages.")
+                    break
+                else:
+                    next_button = next_li.query_selector("button.iweb-pagination-item-link")
+                    if next_button:
+                        print("➡️ Moving to next page of reviews...")
+                        next_button.click()
+                        time.sleep(random.uniform(3, 5))
+                        page_num += 1
+                    else:
+                        print("⚠️ Next button not found.")
+                        break
+            else:
+                print("✅ No pagination element found — done.")
+                break
 
-            context.close()
-            rotation_count += 1
+        product["reviews"] = reviews
 
-        with open("product_details.json", "w", encoding="utf-8") as f:
-            json.dump(detailed_data, f, ensure_ascii=False, indent=2)
+        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(products, f, indent=2, ensure_ascii=False)
 
-        with open("skipped_links.json", "w", encoding="utf-8") as f:
-            json.dump(skipped_links, f, ensure_ascii=False, indent=2)
+        print(f"📦 Finished scraping {len(reviews)} reviews for: {product['link']}")
+        time.sleep(random.uniform(5, 10))
 
-    browser.close()
+    browser_context.close()
+
+print("🎉 All products scraped.")

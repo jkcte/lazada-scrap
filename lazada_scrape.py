@@ -16,7 +16,7 @@ with sync_playwright() as p:
 
     print(f"Navigating to {search_url}...")
     page.goto(search_url)
-    
+
     while True:
         page.wait_for_selector('[data-qa-locator="product-item"]')
 
@@ -29,12 +29,12 @@ with sync_playwright() as p:
         all_products.extend(products)
         print(f"Total collected: {len(all_products)}")
 
-        # Try to click the next page button
         try:
-            next_button = page.query_selector("li.ant-pagination-next button")
-            if next_button and next_button.is_enabled():
-                next_button.click()
-                time.sleep(2)
+            next_locator = page.locator("li.ant-pagination-next button")
+            if next_locator.is_enabled():
+                next_locator.click()
+                page.wait_for_selector('[data-qa-locator="product-item"]')
+                time.sleep(1.5)
             else:
                 print("No more pages or next button disabled.")
                 break
