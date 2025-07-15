@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-PRODUCTS_FILE = 'product_with_no_reviews.json'
+PRODUCTS_FILE = 'filktered_data_part1.json'
 
 with open(PRODUCTS_FILE, encoding='utf-8') as f:
     products = json.load(f)
