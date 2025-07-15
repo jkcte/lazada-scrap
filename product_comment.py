@@ -61,6 +61,9 @@ with sync_playwright() as p:
         # Scroll to reviews section
         page.evaluate("document.querySelector('#block-HvK2CIMcYsU')?.scrollIntoView()")
         time.sleep(2)
+        
+        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(products, f, indent=2, ensure_ascii=False)
 
         # Detect if no reviews exist
         mod_empty = page.query_selector(".mod-empty")
