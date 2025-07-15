@@ -21,9 +21,20 @@ with sync_playwright() as p:
     page = browser_context.new_page()
 
     for product in products:
+        # 🚦 Skip if reviews already present and non-empty
+        if "reviews" in product:
+            print(f"⏩ Skipping (already processed, reviews key exists): {product['link']}")
+            continue
+
+
         url = product["link"]
         print(f"🌐 Visiting: {url}")
-        page.goto(url, timeout=60000)
+        
+        try:
+            page.goto(url, timeout=60000, wait_until="domcontentloaded")
+        except:
+            print(f"❌ Failed to load page: {url}")
+            continue
 
         time.sleep(random.uniform(2, 4))
         page.keyboard.press("PageDown")
