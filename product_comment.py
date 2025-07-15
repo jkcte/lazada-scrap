@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-PRODUCTS_FILE = 'filtered_data_part1.json'
+PRODUCTS_FILE = 'filtered_data_part1_no_reviews.json'
 
 with open(PRODUCTS_FILE, encoding='utf-8') as f:
     products = json.load(f)
@@ -21,11 +21,10 @@ with sync_playwright() as p:
     page = browser_context.new_page()
 
     for product in products:
-        # 🚦 Skip if reviews already present and non-empty
+        # 🚦 Skip if reviews already exist
         if "reviews" in product:
-            print(f"⏩ Skipping (already processed, reviews key exists): {product['link']}")
+            print(f"⏩ Skipping (already processed): {product['link']}")
             continue
-
 
         url = product["link"]
         print(f"🌐 Visiting: {url}")
@@ -44,15 +43,42 @@ with sync_playwright() as p:
             print(f"🚧 CAPTCHA detected at {page.url}. Solve manually and press Enter to continue...")
             input()
 
+        # 📋 Scrape other product fields
+        brand_el = page.query_selector(".pdp-product-brand__brand-link")
+        avg_rating_el = page.query_selector(".score-average")
+        ratings_count_el = page.query_selector(".count")
+        highlights_els = page.query_selector_all(".pdp-product-highlights ul li")
+        description_el = page.query_selector(".pdp-product-detail .detail-content")
+        specs_el = page.query_selector(".pdp-product-specification")
+
+        product["brand"] = brand_el.inner_text().strip() if brand_el else None
+        product["avg_rating"] = avg_rating_el.inner_text().strip() if avg_rating_el else None
+        product["ratings_count"] = ratings_count_el.inner_text().strip() if ratings_count_el else None
+        product["highlights"] = [el.inner_text().strip() for el in highlights_els] if highlights_els else []
+        product["description"] = description_el.inner_text().strip() if description_el else None
+        product["specifications"] = specs_el.inner_text().strip() if specs_el else None
+
         # Scroll to reviews section
         page.evaluate("document.querySelector('#block-HvK2CIMcYsU')?.scrollIntoView()")
         time.sleep(2)
+
+        # Detect if no reviews exist
+        mod_empty = page.query_selector(".mod-empty")
+        if mod_empty:
+            print("❌ No reviews found on this product page (mod-empty detected).")
+            product["reviews"] = []
+            with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(products, f, indent=2, ensure_ascii=False)
+            continue
 
         try:
             page.wait_for_selector(".item-top", timeout=15000)
             print("✅ Reviews found.")
         except:
             print("❌ Reviews not found within 15s. Skipping product.")
+            product["reviews"] = []
+            with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(products, f, indent=2, ensure_ascii=False)
             continue
 
         reviews = []
@@ -87,7 +113,7 @@ with sync_playwright() as p:
                 print(f"    {review_data}")
                 reviews.append(review_data)
 
-            # New pagination logic
+            # Pagination
             next_li = page.query_selector("ul.iweb-pagination.review-pagination li.iweb-pagination-next")
             if next_li:
                 is_disabled = next_li.get_attribute("aria-disabled")
