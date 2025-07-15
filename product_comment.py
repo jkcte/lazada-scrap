@@ -46,12 +46,18 @@ with sync_playwright() as p:
         description_el = page.query_selector(".pdp-product-detail .detail-content")
         specs_el = page.query_selector(".pdp-product-specification")
 
+        breadcrumb_els = page.query_selector_all(".breadcrumb li")
+
         product["brand"] = brand_el.inner_text().strip() if brand_el else None
         product["avg_rating"] = avg_rating_el.inner_text().strip() if avg_rating_el else None
         product["ratings_count"] = ratings_count_el.inner_text().strip() if ratings_count_el else None
         product["highlights"] = [el.inner_text().strip() for el in highlights_els] if highlights_els else []
         product["description"] = description_el.inner_text().strip() if description_el else None
         product["specifications"] = specs_el.inner_text().strip() if specs_el else None
+        product["category"] = " > ".join(
+            [el.inner_text().strip() for el in breadcrumb_els[:-1]]  # skip last (product name)
+        ) if breadcrumb_els else None
+
 
         # Save info fields right away
         with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
