@@ -3,7 +3,17 @@
     "name": "[COD] quanchufjia Laptop Bag 16 15 14 13 11 Inch For Apple Macbook Lenovo Huawei Xiaomi Notebook Ipad Air Pro 12.9 Tablet Laptop Sleeve Bag Cover",
     "link": "https://www.lazada.com.ph/products/pdp-i5089958294.html",
     "price": "₱152.1",
-    "sold": null
+    "sold": null,
+    "reviews": [
+      {
+        "reviewer": "arlita A.",
+        "date": "3 weeks ago",
+        "rating": 5,
+        "sku_info": "black 11 inch",
+        "text": "",
+        "scraped_at": "2025-07-15T10:23:38.626092"
+      }
+    ]
   },
   {
     "name": "SUNSHINE LCD Screen Cleanroom Wipers for Mobile Phone Lint-Free Microfiber Mobile Phone Laptop Lens Cleaning Cloth",
@@ -15,7 +25,33 @@
     "name": "220W GaN Desktop Charger 6-Ports PD 100W USB Type C QC 3.0 Fast Charging Station for IPhone 16 Pro Tablet Macbook Samsung Laptop",
     "link": "https://www.lazada.com.ph/products/pdp-i5015801933.html",
     "price": "₱896.96",
-    "sold": "48 sold"
+    "sold": "48 sold",
+    "reviews": [
+      {
+        "reviewer": "J***.",
+        "date": "3 weeks ago",
+        "rating": 5,
+        "sku_info": "EU Plug",
+        "text": "Works well, inexpensive, can charge multiple devices simultaneously. Would consider ordering this again.",
+        "scraped_at": "2025-07-15T10:24:30.280671"
+      },
+      {
+        "reviewer": "g***.",
+        "date": "2 months ago",
+        "rating": 5,
+        "sku_info": "US Plug",
+        "text": "good doodgood doodgood doodgood doodgood doodgood doodgood doodgood doodgood doodgood dood",
+        "scraped_at": "2025-07-15T10:24:30.309821"
+      },
+      {
+        "reviewer": "David T.",
+        "date": "1 month ago",
+        "rating": 5,
+        "sku_info": "US Plug",
+        "text": "",
+        "scraped_at": "2025-07-15T10:24:30.350267"
+      }
+    ]
   },
   {
     "name": "TechTrance Type-C to USB A OTG Cable for Android Smartphones, Tablets or USB C Laptops OTG-C01",

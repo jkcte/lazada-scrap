@@ -4,7 +4,7 @@ import time
 import random
 from datetime import datetime
 
-PRODUCTS_FILE = 'filktered_data_part1.json'
+PRODUCTS_FILE = 'filtered_data_part1.json'
 
 with open(PRODUCTS_FILE, encoding='utf-8') as f:
     products = json.load(f)
@@ -37,8 +37,12 @@ with sync_playwright() as p:
         page.evaluate("document.querySelector('#block-HvK2CIMcYsU')?.scrollIntoView()")
         time.sleep(2)
 
-        page.wait_for_selector(".item-top", timeout=15000)
-        time.sleep(3)
+        try:
+            page.wait_for_selector(".item-top", timeout=15000)
+            print("✅ Reviews found.")
+        except:
+            print("❌ Reviews not found within 15s. Skipping product.")
+            continue
 
         reviews = []
         page_num = 1
