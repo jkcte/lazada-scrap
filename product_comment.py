@@ -4,12 +4,12 @@ import time
 import random
 from datetime import datetime
 
-PRODUCTS_FILE = 'filtered_data_part1.json'
+PRODUCTS_FILE = 'filtered_data_part2.json'
 
 with open(PRODUCTS_FILE, encoding='utf-8') as f:
     products = json.load(f)
 
-USER_DATA_DIR = r"C:\Users\Owner\AppData\Local\Google\Chrome\User Data"
+USER_DATA_DIR = r"C:\Users\User\AppData\Local\Google\Chrome\User Data"
 
 with sync_playwright() as p:
     browser_context = p.chromium.launch_persistent_context(
